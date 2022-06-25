@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.gamerule.v1.CustomGameRuleCategory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
 import net.fabricmc.fabric.api.gamerule.v1.rule.EnumRule;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameRules;
@@ -16,27 +16,27 @@ public class DamageIncorporatedGameRules {
 	// Categories
 	public static CustomGameRuleCategory DAMAGE_INCORPORATED_EXPLOSIONS_CATEGORY = new CustomGameRuleCategory(
 		new Identifier("damageincorporated", "explosions_gamerules"),
-		new TranslatableText("damageincorporated.gamerule.category.explosions").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
+		Text.translatable("damageincorporated.gamerule.category.explosions").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
 	);
 
 	public static CustomGameRuleCategory DAMAGE_INCORPORATED_GENERAL_CATEGORY = new CustomGameRuleCategory(
 		new Identifier("damageincorporated", "general_gamerules"),
-		new TranslatableText("damageincorporated.gamerule.category.general").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
+			Text.translatable("damageincorporated.gamerule.category.general").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
 	);
 
 	public static CustomGameRuleCategory DAMAGE_INCORPORATED_HOSTILE_MOBS_CATEGORY = new CustomGameRuleCategory(
 		new Identifier("damageincorporated", "hostile_mobs_gamerules"),
-		new TranslatableText("damageincorporated.gamerule.category.hostile_mobs").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
+			Text.translatable("damageincorporated.gamerule.category.hostile_mobs").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
 	);
 
 	public static CustomGameRuleCategory DAMAGE_INCORPORATED_UNDEAD_MOBS_CATEGORY = new CustomGameRuleCategory(
 		new Identifier("damageincorporated", "undead_mobs_gamerules"),
-		new TranslatableText("damageincorporated.gamerule.category.undead_mobs").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
+			Text.translatable("damageincorporated.gamerule.category.undead_mobs").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
 	);
 
 	public static CustomGameRuleCategory DAMAGE_INCORPORATED_PASSIVE_MOBS_CATEGORY = new CustomGameRuleCategory(
 		new Identifier("damageincorporated", "passive_gamerules"),
-		new TranslatableText("damageincorporated.gamerule.category.passive_mobs").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
+			Text.translatable("damageincorporated.gamerule.category.passive_mobs").formatted(Formatting.BOLD, Formatting.DARK_AQUA)
 	);
 
 	// Explosions
