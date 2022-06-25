@@ -1,6 +1,8 @@
 package io.github.ennuil.damageincorporated.mixin.general;
 
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,7 +19,9 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
 @Mixin(ProjectileEntity.class)
-public class ProjectileEntityMixin {
+public abstract class ProjectileEntityMixin {
+	@Shadow @Nullable public abstract Entity getOwner();
+
 	@Unique
 	private AllowedEntities storedGameRuleValue;
 
@@ -36,7 +40,8 @@ public class ProjectileEntityMixin {
 		cancellable = true,
 		locals = LocalCapture.CAPTURE_FAILHARD
 	)
-	private void modifyProjectileReturnValue(World world, BlockPos pos, CallbackInfoReturnable<Boolean> cir, Entity entity) {
+	private void modifyProjectileReturnValue(World world, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+		Entity entity = this.getOwner();
 		switch (this.storedGameRuleValue) {
 			case PLAYER_ONLY -> cir.setReturnValue(entity instanceof PlayerEntity ? entity.canModifyAt(world, pos) : entity == null);
 			case MOB_ONLY -> cir.setReturnValue((entity == null || world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) && !(entity instanceof PlayerEntity));
