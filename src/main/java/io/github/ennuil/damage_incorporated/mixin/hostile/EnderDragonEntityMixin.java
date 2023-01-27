@@ -1,34 +1,23 @@
 package io.github.ennuil.damage_incorporated.mixin.hostile;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.world.World;
-import net.minecraft.world.GameRules.BooleanRule;
-import net.minecraft.world.GameRules.Key;
 
 @Mixin(EnderDragonEntity.class)
-public class EnderDragonEntityMixin extends MobEntity {
-	private EnderDragonEntityMixin(EntityType<? extends MobEntity> entityType, World world) {
-		super(entityType, world);
-	}
-
-	@ModifyArg(
-		method = "destroyBlocks(Lnet/minecraft/util/math/Box;)Z",
+public abstract class EnderDragonEntityMixin {
+	@WrapOperation(
+		method = "destroyBlocks",
 		at = @At(
 			value = "INVOKE",
-			target = "net/minecraft/world/GameRules.getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
 		)
 	)
-	private Key<BooleanRule> modifyEnderDragonGameRuleArg(Key<BooleanRule> originalRule) {
-		if (this.world.getGameRules().getBoolean(originalRule)) {
-			return DamageIncorporatedGameRules.CAN_ENDER_DRAGON_DESTROY_BLOCKS;
-		}
-		return originalRule;
+	private boolean di$modifyEnderDragonBlockBreaking(GameRules gameRules, GameRules.Key<GameRules.BooleanRule> booleanRule, Operation<Boolean> original) {
+		return original.call(gameRules, booleanRule) && gameRules.getBoolean(DIGameRules.CAN_ENDER_DRAGON_DESTROY_BLOCKS);
 	}
 }

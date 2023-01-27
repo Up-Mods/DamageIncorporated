@@ -1,47 +1,30 @@
 package io.github.ennuil.damage_incorporated.mixin.general;
 
-import net.minecraft.block.BlockState;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIEnums.AllowedEntities;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
 import net.minecraft.block.PowderSnowBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedEnums.AllowedEntities;
 
 @Mixin(PowderSnowBlock.class)
-public class PowderSnowBlockMixin {
-	// I really don't like doing this, but well, at least it isn't a @Redirect
-	@Inject(
-		method = "onEntityCollision(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V",
+public abstract class PowderSnowBlockMixin {
+	@WrapOperation(
+		method = "onEntityCollision",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/entity/Entity;isOnFire()Z"
-		),
-		cancellable = true
+		)
 	)
-	private void cancelIfStatement(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo ci) {
-		boolean cancelPowderSnowBreak = false;
-		AllowedEntities gameRuleValue = world.getGameRules().get(DamageIncorporatedGameRules.CAN_BURNING_MOBS_BREAK_POWDER_SNOW_RULE).get();
+	private boolean di$modifyEntityFilter(Entity entity, Operation<Boolean> original) {
+		var gameRuleValue = entity.world.getGameRules().get(DIGameRules.CAN_BURNING_MOBS_BREAK_POWDER_SNOW).get();
+		boolean allCheck = gameRuleValue.equals(AllowedEntities.ALL);
+		boolean playerCheck = gameRuleValue.equals(AllowedEntities.PLAYER_ONLY) && entity instanceof PlayerEntity;
+		boolean mobCheck = gameRuleValue.equals(AllowedEntities.MOB_ONLY) && !(entity instanceof PlayerEntity);
 
-		if (!gameRuleValue.equals(AllowedEntities.ALL) && !gameRuleValue.equals(AllowedEntities.OFF)) {
-			if (entity.isOnFire()) {
-				cancelPowderSnowBreak = gameRuleValue.equals(AllowedEntities.MOB_ONLY) == entity instanceof PlayerEntity;
-			}
-		} else {
-			cancelPowderSnowBreak = gameRuleValue.equals(AllowedEntities.OFF);
-		}
-
-		// painnnnnnnnnnnnnn
-		if (cancelPowderSnowBreak) {
-			ci.cancel();
-			entity.setOnFire(false);
-		}
+		return original.call(entity) && (allCheck || playerCheck || mobCheck);
 	}
 }

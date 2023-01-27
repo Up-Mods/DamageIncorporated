@@ -1,31 +1,23 @@
 package io.github.ennuil.damage_incorporated.mixin.other_mobs;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
 import net.minecraft.entity.passive.FoxEntity;
-import net.minecraft.world.GameRules.BooleanRule;
-import net.minecraft.world.GameRules.Key;
+import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(FoxEntity.PickBerriesGoal.class)
-public class PickBerriesGoalMixin {
-	@Shadow(aliases = "field_17975")
-	private FoxEntity field_17975;
-
-	@ModifyArg(
-		method = "pickFromTargetPos()V",
+public abstract class PickBerriesGoalMixin {
+	@WrapOperation(
+		method = "pickFromTargetPos",
 		at = @At(
 			value = "INVOKE",
-			target = "net/minecraft/world/GameRules.getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
 		)
 	)
-	private Key<BooleanRule> modifyFoxGoalsGameRuleArg(Key<BooleanRule> originalRule) {
-		if (field_17975.world.getGameRules().getBoolean(originalRule)) {
-			return DamageIncorporatedGameRules.CAN_FOXES_PICK_BERRIES_RULE;
-		}
-		return originalRule;
+	private boolean di$modifyFoxBerryPicking(GameRules gameRules, GameRules.Key<GameRules.BooleanRule> booleanRule, Operation<Boolean> original) {
+		return original.call(gameRules, booleanRule) && gameRules.getBoolean(DIGameRules.CAN_FOXES_PICK_BERRIES);
 	}
 }

@@ -1,69 +1,67 @@
 package io.github.ennuil.damage_incorporated.mixin.explosions;
 
-import net.minecraft.entity.EntityType;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIEnums;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
+import io.github.ennuil.damage_incorporated.hooks.WorldExtensions;
+import io.github.ennuil.damage_incorporated.utils.DIHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
-
+import net.minecraft.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedEnums;
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedEnums.DamageIncDestructionType;
 
 @Mixin(CreeperEntity.class)
-public class CreeperEntityMixin extends HostileEntity {
-	private CreeperEntityMixin(EntityType<? extends HostileEntity> entityType, World world) {
-		super(entityType, world);
-	}
-
-	@Unique
-	private DamageIncDestructionType di$storedCreeperGameRuleValue;
-
-	@Unique
-	private DamageIncDestructionType di$storedChargedCreeperGameRuleValue;
-
-	@Inject(
-		method = "explode()V",
-		at = @At("HEAD")
-	)
-	private void getCreeperGameRuleValues(CallbackInfo ci) {
-		this.di$storedCreeperGameRuleValue = this.world.getGameRules().get(DamageIncorporatedGameRules.CREEPER_DESTRUCTION_TYPE_RULE).get();
-		this.di$storedChargedCreeperGameRuleValue = this.world.getGameRules().get(DamageIncorporatedGameRules.CHARGED_CREEPER_DESTRUCTION_TYPE_RULE).get();
-	}
-
-	@ModifyArgs(
-		method = "explode()V",
+public abstract class CreeperEntityMixin {
+	@WrapOperation(
+		method = "explode",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/explosion/Explosion$DestructionType;)Lnet/minecraft/world/explosion/Explosion;"
+			target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/World$ExplosionSourceType;)Lnet/minecraft/world/explosion/Explosion;"
 		)
 	)
-	private void modifyCreeperExplosion(Args args) {
-		if (this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
-			if (!this.isOverlayConditionMet()) {
-				if (this.di$storedCreeperGameRuleValue.equals(DamageIncDestructionType.NONE)) {
-					args.set(4, 0.0F);
+	private Explosion di$modifyCreeperExplosion(World world, Entity entity, double x, double y, double z, float power, World.ExplosionSourceType sourceType, Operation<Explosion> original) {
+		var gameRules = world.getGameRules();
+		if (gameRules.getBoolean(GameRules.DO_MOB_GRIEFING)) {
+			// Creepers and charged creepers are treated as separate here
+			var explosions = gameRules.get(DIGameRules.CREEPER_EXPLOSIONS).get();
+			boolean dropDecay = gameRules.getBoolean(DIGameRules.CREEPER_EXPLOSION_DROP_DECAY);
+
+			if (this.isEnergySwirlActive()) {
+				var chargedExplosions = gameRules.get(DIGameRules.CHARGED_CREEPER_EXPLOSIONS).get();
+				var chargedDropDecay = gameRules.get(DIGameRules.CHARGED_CREEPER_EXPLOSION_DROP_DECAY).get();
+
+				boolean inheritedExplosionDiffers = chargedExplosions == DIEnums.DIDestructionTypeWithInheritage.INHERIT_FROM_PARENT
+						&& explosions != DIEnums.DIDestructionType.DESTROY;
+				boolean inheritedDropDecayDiffers = chargedDropDecay == DIEnums.InheritageTristate.INHERIT_FROM_PARENT && !dropDecay;
+				boolean explosionDiffers = chargedExplosions != DIEnums.DIDestructionTypeWithInheritage.INHERIT_FROM_PARENT;
+				boolean dropDecayDiffers = chargedDropDecay != DIEnums.InheritageTristate.INHERIT_FROM_PARENT;
+
+				if (inheritedExplosionDiffers || inheritedDropDecayDiffers || explosionDiffers || dropDecayDiffers) {
+					var destructionType = DIHelper.getDestructionType(chargedExplosions, chargedDropDecay, explosions, dropDecay);
+					power = chargedExplosions == DIEnums.DIDestructionTypeWithInheritage.INHERIT_FROM_PARENT
+						? explosions == DIEnums.DIDestructionType.NONE ? 0.0F : power
+						: chargedExplosions == DIEnums.DIDestructionTypeWithInheritage.NONE ? 0.0F : power;
+
+					return ((WorldExtensions) world).createExplosion(entity, null, null, x, y, z, power, false, sourceType, destructionType);
 				}
-				args.set(5, DamageIncorporatedEnums.translateDestructionType(this.di$storedCreeperGameRuleValue));
 			} else {
-				if (this.di$storedChargedCreeperGameRuleValue.equals(DamageIncDestructionType.NONE)) {
-					args.set(4, 0.0F);
+				if (explosions != DIEnums.DIDestructionType.DESTROY || !dropDecay) {
+					var destructionType = DIHelper.getDestructionType(explosions, dropDecay);
+					power = explosions == DIEnums.DIDestructionType.NONE ? 0.0F : power;
+
+					return ((WorldExtensions) world).createExplosion(entity, null, null, x, y, z, power, false, sourceType, destructionType);
 				}
-				args.set(5, DamageIncorporatedEnums.translateDestructionType(this.di$storedChargedCreeperGameRuleValue));
 			}
 		}
+
+		return original.call(world, entity, x, y, z, power, sourceType);
 	}
 
-
 	@Shadow
-	public boolean isOverlayConditionMet() { return false; }
+	public abstract boolean isEnergySwirlActive();
 }

@@ -1,33 +1,23 @@
 package io.github.ennuil.damage_incorporated.mixin.other_mobs;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
+import net.minecraft.entity.passive.SnowGolemEntity;
+import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.GolemEntity;
-import net.minecraft.entity.passive.SnowGolemEntity;
-import net.minecraft.world.World;
 
 @Mixin(SnowGolemEntity.class)
-public class SnowGolemEntityMixin extends GolemEntity {
-	private SnowGolemEntityMixin(EntityType<? extends GolemEntity> entityType, World world) {
-		super(entityType, world);
-	}
-
-	@Inject(
-		method = "tickMovement()V",
+public abstract class SnowGolemEntityMixin {
+	@WrapOperation(
+		method = "tickMovement",
 		at = @At(
 			value = "INVOKE",
-			target = "net/minecraft/world/GameRules.getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
-		),
-		cancellable = true
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
+		)
 	)
-	private void disableSnowGolemSnowPath(CallbackInfo ci) {
-		if (!this.world.getGameRules().getBoolean(DamageIncorporatedGameRules.SNOW_GOLEM_TRAIL_RULE)) {
-			ci.cancel();
-		}
+	private boolean di$modifySnowGolemTrail(GameRules gameRules, GameRules.Key<GameRules.BooleanRule> booleanRule, Operation<Boolean> original) {
+		return original.call(gameRules, booleanRule) && gameRules.getBoolean(DIGameRules.SNOW_GOLEM_TRAIL);
 	}
 }

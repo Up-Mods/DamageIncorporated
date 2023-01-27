@@ -1,50 +1,36 @@
 package io.github.ennuil.damage_incorporated.mixin.other_mobs;
 
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
 import net.minecraft.entity.ai.goal.EatGrassGoal;
-import net.minecraft.world.World;
-import net.minecraft.world.GameRules.BooleanRule;
-import net.minecraft.world.GameRules.Key;
+import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EatGrassGoal.class)
-public class EatGrassGoalMixin {
-	@Shadow
-	@Final
-	private World world;
-
-	@ModifyArg(
-		method = "tick()V",
+public abstract class EatGrassGoalMixin {
+	@WrapOperation(
+		method = "tick",
 		at = @At(
 			value = "INVOKE",
-			target = "net/minecraft/world/GameRules.getBoolean(Lnet/minecraft/world/GameRules$Key;)Z",
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z",
 			ordinal = 0
 		)
 	)
-	private Key<BooleanRule> modifyGrassGameRule(Key<BooleanRule> originalRule) {
-		if (this.world.getGameRules().getBoolean(originalRule)) {
-			return DamageIncorporatedGameRules.CAN_SHEEP_BREAK_GRASS_RULE;
-		}
-		return originalRule;
+	private boolean di$modifySheepGrassBreaking(GameRules gameRules, GameRules.Key<GameRules.BooleanRule> booleanRule, Operation<Boolean> original) {
+		return original.call(gameRules, booleanRule) && gameRules.getBoolean(DIGameRules.CAN_SHEEP_BREAK_GRASS);
 	}
 
-	@ModifyArg(
-		method = "tick()V",
+	@WrapOperation(
+		method = "tick",
 		at = @At(
 			value = "INVOKE",
-			target = "net/minecraft/world/GameRules.getBoolean(Lnet/minecraft/world/GameRules$Key;)Z",
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z",
 			ordinal = 1
 		)
 	)
-	private Key<BooleanRule> modifyGrassBlockGameRule(Key<BooleanRule> originalRule) {
-		if (this.world.getGameRules().getBoolean(originalRule)) {
-			return DamageIncorporatedGameRules.CAN_SHEEP_TURN_GRASS_BLOCKS_INTO_DIRT_RULE;
-		}
-		return originalRule;
+	private boolean di$modifySheepGrassBlockDirting(GameRules gameRules, GameRules.Key<GameRules.BooleanRule> booleanRule, Operation<Boolean> original) {
+		return original.call(gameRules, booleanRule) && gameRules.getBoolean(DIGameRules.CAN_SHEEP_TURN_GRASS_BLOCKS_INTO_DIRT);
 	}
 }

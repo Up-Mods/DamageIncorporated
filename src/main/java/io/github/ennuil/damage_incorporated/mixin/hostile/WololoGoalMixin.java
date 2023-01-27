@@ -1,31 +1,25 @@
 package io.github.ennuil.damage_incorporated.mixin.hostile;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
 import net.minecraft.entity.mob.EvokerEntity;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.GameRules.BooleanRule;
 import net.minecraft.world.GameRules.Key;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EvokerEntity.WololoGoal.class)
 public abstract class WololoGoalMixin {
-	@Shadow(aliases = "field_7268")
-	private EvokerEntity field_7268;
-
-	@ModifyArg(
-		method = "canStart()Z",
+	@WrapOperation(
+		method = "canStart",
 		at = @At(
 			value = "INVOKE",
-			target = "net/minecraft/world/GameRules.getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
 		)
 	)
-	private Key<BooleanRule> modifyWololoGameRuleArg(Key<BooleanRule> originalRule) {
-		if (field_7268.world.getGameRules().getBoolean(originalRule)) {
-			return DamageIncorporatedGameRules.CAN_EVOKERS_WOLOLO_RULE;
-		}
-		return originalRule;
+	private boolean di$modifyWololo(GameRules gameRules, Key<BooleanRule> booleanRule, Operation<Boolean> original) {
+		return original.call(gameRules, booleanRule) && gameRules.getBoolean(DIGameRules.CAN_EVOKERS_WOLOLO);
 	}
 }

@@ -1,32 +1,22 @@
 package io.github.ennuil.damage_incorporated.mixin.other_mobs;
 
-import org.spongepowered.asm.mixin.Final;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
+import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
-import net.minecraft.entity.passive.RabbitEntity;
 
 @Mixin(targets = "net.minecraft.entity.passive.RabbitEntity$EatCarrotCropGoal")
-public class EatCarrotCropGoalMixin {
-	@Shadow
-	@Final
-	private RabbitEntity rabbit;
-
-	@Inject(
-		method = "canStart()Z",
+public abstract class EatCarrotCropGoalMixin {
+	@WrapOperation(
+		method = "canStart",
 		at = @At(
-			value = "FIELD",
-			target = "Lnet/minecraft/entity/passive/RabbitEntity$EatCarrotCropGoal;hasTarget:Z"
-		),
-		cancellable = true
+			value = "INVOKE",
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
+		)
 	)
-	private void controlRabbitCarrotEating(CallbackInfoReturnable<Boolean> cir) {
-		if (!this.rabbit.world.getGameRules().getBoolean(DamageIncorporatedGameRules.CAN_RABBITS_EAT_CARROT_CROPS_RULE)) {
-			cir.setReturnValue(false);
-		}
+	private boolean di$modifyRabbitCarrotEating(GameRules gameRules, GameRules.Key<GameRules.BooleanRule> booleanRule, Operation<Boolean> original) {
+		return original.call(gameRules, booleanRule) && gameRules.getBoolean(DIGameRules.CAN_RABBITS_EAT_CARROT_CROPS);
 	}
 }

@@ -1,33 +1,23 @@
 package io.github.ennuil.damage_incorporated.mixin.hostile;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
+import net.minecraft.entity.mob.PiglinEntity;
+import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.mob.AbstractPiglinEntity;
-import net.minecraft.entity.mob.PiglinEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 
 @Mixin(PiglinEntity.class)
-public abstract class PiglinEntityMixin extends AbstractPiglinEntity {
-	private PiglinEntityMixin(EntityType<? extends AbstractPiglinEntity> entityType, World world) {
-		super(entityType, world);
-	}
-
-	@Inject(
-		method = "canGather(Lnet/minecraft/item/ItemStack;)Z",
-		at = @At("RETURN"),
-		cancellable = true
+public abstract class PiglinEntityMixin {
+	@WrapOperation(
+		method = "canGather",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
+		)
 	)
-	private void controlPiglinGather(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-		if (cir.getReturnValueZ()) {
-			if (!this.world.getGameRules().getBoolean(DamageIncorporatedGameRules.CAN_PIGLINS_GATHER_RULE)) {
-				cir.setReturnValue(false);
-			}
-		}
+	private boolean di$modifyPiglinGathering(GameRules gameRules, GameRules.Key<GameRules.BooleanRule> booleanRule, Operation<Boolean> original) {
+		return original.call(gameRules, booleanRule) && gameRules.getBoolean(DIGameRules.CAN_PIGLINS_PICK_UP_ITEMS);
 	}
 }

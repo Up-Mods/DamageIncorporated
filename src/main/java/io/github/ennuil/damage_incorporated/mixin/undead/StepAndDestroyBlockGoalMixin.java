@@ -1,48 +1,47 @@
 package io.github.ennuil.damage_incorporated.mixin.undead;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import io.github.ennuil.damage_incorporated.game_rules.DIGameRules;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.StepAndDestroyBlockGoal;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.GameRules.BooleanRule;
 import net.minecraft.world.GameRules.Key;
-
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import io.github.ennuil.damage_incorporated.game_rules.DamageIncorporatedGameRules;
 
 @Mixin(StepAndDestroyBlockGoal.class)
-public class StepAndDestroyBlockGoalMixin {
+public abstract class StepAndDestroyBlockGoalMixin {
 	@Shadow
 	@Final
 	private MobEntity stepAndDestroyMob;
 
-	@ModifyArg(
-		method = "canStart()Z",
+	@WrapOperation(
+		method = "canStart",
 		at = @At(
 			value = "INVOKE",
-			target = "net/minecraft/world/GameRules.getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
-		),
-		index = 0
+			target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"
+		)
 	)
-	private Key<BooleanRule> modifyStepAndDestroyGameRuleArg(Key<BooleanRule> originalRule) {
-		if (this.stepAndDestroyMob.world.getGameRules().getBoolean(originalRule)) {
-			EntityType<?> mobType = this.stepAndDestroyMob.getType();
-			if (mobType.equals(EntityType.ZOMBIE)) {
-				return DamageIncorporatedGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_ZOMBIES_RULE;
-			} else if (mobType.equals(EntityType.ZOMBIFIED_PIGLIN)) {
-				return DamageIncorporatedGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_ZOMBIFIED_PIGLINS_RULE;
-			} else if (mobType.equals(EntityType.ZOMBIE_VILLAGER)) {
-				return DamageIncorporatedGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_ZOMBIE_VILLAGERS_RULE;
-			} else if (mobType.equals(EntityType.HUSK)) {
-				return DamageIncorporatedGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_HUSKS_RULE;
-			} else if (mobType.equals(EntityType.DROWNED)) {
-				return DamageIncorporatedGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_DROWNEDS_RULE;
-			}
+	private boolean di$modifyUndeadStepAndDestroy(GameRules gameRules, Key<BooleanRule> booleanRule, Operation<Boolean> original) {
+		EntityType<?> mobType = this.stepAndDestroyMob.getType();
+		GameRules.Key<BooleanRule> diGameRule = null;
+		if (mobType.equals(EntityType.ZOMBIE)) {
+			diGameRule = DIGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_ZOMBIES;
+		} else if (mobType.equals(EntityType.ZOMBIFIED_PIGLIN)) {
+			diGameRule = DIGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_ZOMBIFIED_PIGLINS;
+		} else if (mobType.equals(EntityType.ZOMBIE_VILLAGER)) {
+			diGameRule = DIGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_ZOMBIE_VILLAGERS;
+		} else if (mobType.equals(EntityType.HUSK)) {
+			diGameRule = DIGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_HUSKS;
+		} else if (mobType.equals(EntityType.DROWNED)) {
+			diGameRule = DIGameRules.CAN_TURTLE_EGGS_BE_STOMPED_BY_DROWNEDS;
 		}
-		return originalRule;
+
+		return original.call(gameRules, booleanRule) && (diGameRule != null && gameRules.getBoolean(diGameRule));
 	}
 }

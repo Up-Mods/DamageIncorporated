@@ -20,20 +20,21 @@
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
-			"init": "io.github.ennuil.damage_incorporated.DamageIncorporatedMod"
+			"init": "io.github.ennuil.damage_incorporated.DIMod",
+			"pre_launch": "io.github.ennuil.damage_incorporated.DIPreLaunchInit"
 		},
 		"depends": [
 			{
 				"id": "quilt_loader",
-				"versions": ">=0.17.0-"
+				"versions": ">=0.17.6-"
 			},
 			{
 				"id": "quilted_fabric_api",
-				"versions": ">=2.0.0-"
+				"versions": ">=5.0.0-"
 			},
 			{
 				"id": "minecraft",
-				"versions": ">=1.19"
+				"versions": ">=1.19.3"
 			}
 		]
 	},
