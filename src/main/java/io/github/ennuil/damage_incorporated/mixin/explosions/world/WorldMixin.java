@@ -10,6 +10,7 @@ import net.minecraft.world.explosion.ExplosionBehavior;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
 @Mixin(World.class)
 public abstract class WorldMixin implements WorldExtensions {
 	@Override
@@ -44,10 +45,9 @@ public abstract class WorldMixin implements WorldExtensions {
 	) {
 		// If "Destroy with Decay" is used, then we can safely override it with vanilla's drop decay
 		if (destructionType == Explosion.DestructionType.DESTROY_WITH_DECAY) {
-			destructionType = switch (sourceType) {
-				case MOB -> this.getDestructionType(GameRules.MOB_EXPLOSION_DROP_DECAY);
-				default -> destructionType;
-			};
+			if (sourceType == World.ExplosionSourceType.MOB) {
+				this.getDestructionType(GameRules.MOB_EXPLOSION_DROP_DECAY);
+			}
 		}
 
 		Explosion explosion = new Explosion((World) (Object) this, entity, source, behaviour, x, y, z, power, createFire, destructionType);
@@ -57,5 +57,5 @@ public abstract class WorldMixin implements WorldExtensions {
 	}
 
 	@Shadow
-	abstract Explosion.DestructionType getDestructionType(GameRules.Key<GameRules.BooleanRule> dropDecayRule);
+	protected abstract Explosion.DestructionType getDestructionType(GameRules.Key<GameRules.BooleanRule> dropDecayRule);
 }

@@ -3,7 +3,7 @@ package io.github.ennuil.damage_incorporated.mixin.explosions.world;
 import io.github.ennuil.damage_incorporated.hooks.WorldExtensions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
+import net.minecraft.network.packet.s2c.play.ExplosionOccursS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
@@ -16,11 +16,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
+
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin implements WorldExtensions {
 	@Shadow
 	@Final
 	List<ServerPlayerEntity> players;
+
 	@Override
 	public Explosion createExplosion(
 		@Nullable Entity entity,
@@ -39,10 +41,10 @@ public abstract class ServerWorldMixin implements WorldExtensions {
 			explosion.clearAffectedBlocks();
 		}
 
-		for (ServerPlayerEntity serverPlayerEntity : this.players) {
+		for (var serverPlayerEntity : this.players) {
 			if (serverPlayerEntity.squaredDistanceTo(x, y, z) < 4096.0) {
 				serverPlayerEntity.networkHandler.sendPacket(
-					new ExplosionS2CPacket(x, y, z, power, explosion.getAffectedBlocks(), (Vec3d)explosion.getAffectedPlayers().get(serverPlayerEntity))
+					new ExplosionOccursS2CPacket(x, y, z, power, explosion.getAffectedBlocks(), (Vec3d)explosion.getAffectedPlayers().get(serverPlayerEntity))
 				);
 			}
 		}

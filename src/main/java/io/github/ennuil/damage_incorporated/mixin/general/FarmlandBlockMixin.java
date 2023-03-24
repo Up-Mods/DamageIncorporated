@@ -22,10 +22,7 @@ public abstract class FarmlandBlockMixin {
 	@Unique
 	private AllowedEntities di$storedGameRuleValue;
 
-	@Inject(
-		method = "onLandedUpon",
-		at = @At("HEAD")
-	)
+	@Inject(method = "onLandedUpon", at = @At("HEAD"))
 	private void getOnLandedUponArgs(World world, BlockState state, BlockPos pos, Entity entity, float fallDistance, CallbackInfo ci) {
 		this.di$storedGameRuleValue = world.getGameRules().get(DIGameRules.FARMLAND_TRAMPLING).get();
 	}
