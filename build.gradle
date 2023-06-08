@@ -4,10 +4,10 @@ plugins {
 	alias libs.plugins.machete
 }
 
-archivesBaseName = project.archives_base_name
-version = System.env.GITHUB_ACTIONS == "true"
-	? "${project.version}+${libs.versions.minecraft.get()}.github.${System.env.GITHUB_RUN_NUMBER}"
-	: "${project.version}+${libs.versions.minecraft.get()}"
+base.archivesName = project.archives_base_name
+version = System.env.GITHUB_ACTIONS == 'true'
+	? "$project.version+${libs.versions.minecraft.get()}.github.$System.env.GITHUB_RUN_NUMBER"
+	: "$project.version+${libs.versions.minecraft.get()}"
 group = project.maven_group
 
 // Add repositories to retrieve artifacts from in here.
@@ -21,17 +21,8 @@ repositories {
 dependencies {
 	minecraft libs.minecraft
 	mappings variantOf(libs.quilt.mappings) { classifier 'intermediary-v2' }
-	// Replace the above line with the block below if you want to use Mojang mappings as your primary mappings, falling back on QM for parameters and Javadocs
-	/*
-	mappings loom.layered {
-		mappings "org.quiltmc:quilt-mappings:${libs.versions.quilt.mappings.get()}:intermediary-v2"
-		officialMojangMappings()
-	}
-	*/
 	modImplementation libs.quilt.loader
 
-	// QSL is not a complete API; You will need Quilted Fabric API to fill in the gaps.
-	// Quilted Fabric API will automatically pull in the correct QSL version.
 	modImplementation libs.quilted.fabric.api
 	implementation libs.mixin.extras
 	annotationProcessor libs.mixin.extras
@@ -43,7 +34,7 @@ processResources {
 	inputs.property 'version', version
 
 	filesMatching('quilt.mod.json') {
-		expand "version": version
+		expand 'version': version
 	}
 }
 
@@ -69,7 +60,7 @@ java {
 
 jar {
 	from('LICENSE') {
-		rename { "${it}_${archivesBaseName}" }
+		rename { "${it}_${base.archivesName.get()}" }
 	}
 }
 

@@ -61,6 +61,7 @@
   "gamerule.canWitherBreakBlocks": "Permitir que Wither quebre blocos",
   "gamerule.canRavagersBreakLeaves": "Permitir que devastadores quebrem folhas",
   "gamerule.canRavagersBreakCrops": "Permitir que devastadores quebrem plantações",
+  "gamerule.canRavagersBreakPitcherCrops": "Permitir que devastadores quebrem plantações de planta ancestral",
   "gamerule.canEnderDragonDestroyBlocks": "Permitir que Dragão Ender quebre blocos",
   "gamerule.blazeFireballFireSpread": "Permitir que as bolas de fogo de blazes espalhem fogo",
   "gamerule.canPiglinsPickUpItems": "Permitir que piglins peguem items",

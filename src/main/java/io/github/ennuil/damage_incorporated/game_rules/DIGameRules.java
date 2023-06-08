@@ -70,6 +70,7 @@ public class DIGameRules {
 	public static final GameRules.Key<BooleanRule> CAN_WITHER_BREAK_BLOCKS = GameRuleRegistry.register("canWitherBreakBlocks", DAMAGE_INCORPORATED_HOSTILE_MOBS_CATEGORY, GameRuleFactory.createBooleanRule(true));
 	public static final GameRules.Key<BooleanRule> CAN_RAVAGERS_BREAK_LEAVES = GameRuleRegistry.register("canRavagersBreakLeaves", DAMAGE_INCORPORATED_HOSTILE_MOBS_CATEGORY, GameRuleFactory.createBooleanRule(true));
 	public static final GameRules.Key<BooleanRule> CAN_RAVAGERS_BREAK_CROPS = GameRuleRegistry.register("canRavagersBreakCrops", DAMAGE_INCORPORATED_HOSTILE_MOBS_CATEGORY, GameRuleFactory.createBooleanRule(true));
+	public static final GameRules.Key<BooleanRule> CAN_RAVAGERS_BREAK_PITCHER_CROPS = GameRuleRegistry.register("canRavagersBreakPitcherCrops", DAMAGE_INCORPORATED_HOSTILE_MOBS_CATEGORY, GameRuleFactory.createBooleanRule(true));
 	public static final GameRules.Key<BooleanRule> CAN_ENDER_DRAGON_DESTROY_BLOCKS = GameRuleRegistry.register("canEnderDragonDestroyBlocks", DAMAGE_INCORPORATED_HOSTILE_MOBS_CATEGORY, GameRuleFactory.createBooleanRule(true));
 	public static final GameRules.Key<BooleanRule> BLAZE_FIREBALL_FIRE_SPREAD = GameRuleRegistry.register("blazeFireballFireSpread", DAMAGE_INCORPORATED_HOSTILE_MOBS_CATEGORY, GameRuleFactory.createBooleanRule(true));
 	public static final GameRules.Key<BooleanRule> CAN_PIGLINS_PICK_UP_ITEMS = GameRuleRegistry.register("canPiglinsPickUpItems", DAMAGE_INCORPORATED_HOSTILE_MOBS_CATEGORY, GameRuleFactory.createBooleanRule(true));

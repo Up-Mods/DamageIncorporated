@@ -21,6 +21,7 @@
     "hostile.EnderDragonEntityMixin",
     "hostile.PickUpBlockGoalMixin",
     "hostile.PiglinEntityMixin",
+    "hostile.PitcherCropBlockMixin",
     "hostile.PlaceBlockGoalMixin",
     "hostile.RavagerEntityMixin",
     "hostile.SmallFireballEntityMixin",

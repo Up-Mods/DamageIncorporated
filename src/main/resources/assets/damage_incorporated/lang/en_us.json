@@ -61,6 +61,7 @@
   "gamerule.canWitherBreakBlocks": "Allow Wither to break blocks",
   "gamerule.canRavagersBreakLeaves": "Allow ravagers to break leaves",
   "gamerule.canRavagersBreakCrops": "Allow ravagers to break crops",
+  "gamerule.canRavagersBreakPitcherCrops": "Allow ravagers to break pitcher crops",
   "gamerule.canEnderDragonDestroyBlocks": "Allow the Ender Dragon to destroy blocks",
   "gamerule.blazeFireballFireSpread": "Allow blaze fireballs to spread fire",
   "gamerule.canPiglinsPickUpItems": "Allow piglins to pick up items",

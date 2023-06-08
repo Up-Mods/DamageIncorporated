@@ -20,7 +20,7 @@ public abstract class PowderSnowBlockMixin {
 		)
 	)
 	private boolean di$modifyEntityFilter(Entity entity, Operation<Boolean> original) {
-		var gameRuleValue = entity.world.getGameRules().get(DIGameRules.CAN_BURNING_MOBS_BREAK_POWDER_SNOW).get();
+		var gameRuleValue = entity.getWorld().getGameRules().get(DIGameRules.CAN_BURNING_MOBS_BREAK_POWDER_SNOW).get();
 		boolean allCheck = gameRuleValue.equals(AllowedEntities.ALL);
 		boolean playerCheck = gameRuleValue.equals(AllowedEntities.PLAYER_ONLY) && entity instanceof PlayerEntity;
 		boolean mobCheck = gameRuleValue.equals(AllowedEntities.MOB_ONLY) && !(entity instanceof PlayerEntity);
